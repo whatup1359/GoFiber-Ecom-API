@@ -1,28 +1,30 @@
 package utils
 
 import (
-	"fmt"
-	"github.com/golang-jwt/jwt/v5"
 	"os"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type Claims struct {
-	UserID string   `json:"user_id"`
+	UserID string `json:"user_id"`
+	Email  string `json:"email"`
 	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
 // สร้างฟังก์ชันสำหรับสร้าง JWT Token
-func GenerateJWT(userID uint, role string) (string, error) {
+func GenerateJWT(userID, email, role string) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 
 	claims := &Claims{
-		UserID: fmt.Sprintf("%d", userID), // แก้ไขการ convert uint เป็น string
-		Role: role,
+		UserID: userID,
+		Email:  email,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-			IssuedAt: jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
@@ -31,7 +33,7 @@ func GenerateJWT(userID uint, role string) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
-// ฟังก์ชันตรวจสอบ JWT Token
+// ฟังก์ชันสำหรับตรวจสอบ JWT Token
 func ValidateJWT(tokenString string) (*Claims, error) {
 
 	secret := os.Getenv("JWT_SECRET")
